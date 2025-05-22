@@ -33,12 +33,13 @@ pip install numpy scipy scikit-learn einops matplotlib tqdm h5py
 ```
 
 ---
-## 시각화 예시
+## 📷 시각화 예시
 
 <p align="center">
-  <img src="figures/FX10e_TEST_2025-05-14_07-11-11_preview.png" alt="샘플1" width="45%"/>
-  <img src="figures/FX10e_TEST_2025-05-14_07-12-17_preview.png" alt="샘플2" width="45%"/>
+  <img src="figures/FX10e_TEST_2025-05-14_07-11-11_predict_overlay.png" alt="샘플1" width="45%"/>
+  <img src="figures/FX10e_TEST_2025-05-14_07-12-17_predict_overlay.png" alt="샘플2" width="45%"/>
 </p>
+
 
 ---
 
