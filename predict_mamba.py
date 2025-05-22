@@ -126,19 +126,29 @@ print(f"[DEBUG] 예측 클래스 종류: {np.unique(pred_all)}")
 rgb_img = convert_to_rgb(input)
 overlay_img = overlay_prediction_on_rgb(rgb_img, pred_map, plt.get_cmap("tab20"))
 
-plt.figure(figsize=(15, 4))
-plt.subplot(1, 3, 1)
+plt.figure(figsize=(12, 10))
+
+# ① Input RGB
+plt.subplot(2, 2, 1)
 plt.title("Input RGB")
 plt.imshow(rgb_img)
 plt.axis("off")
 
-plt.subplot(1, 3, 2)
-plt.title("Prediction")
+# ② GT (Label)
+plt.subplot(2, 2, 2)
+plt.title("Ground Truth")
+plt.imshow(label, cmap="tab20", vmin=0, vmax=num_classes - 1)
+plt.axis("off")
+
+# ③ Prediction
+plt.subplot(2, 2, 3)
+plt.title("Prediction (Full Area)")
 plt.imshow(pred_map, cmap="tab20", vmin=0, vmax=num_classes - 1)
 plt.axis("off")
 
-plt.subplot(1, 3, 3)
-plt.title("Overlay")
+# ④ RGB Overlay
+plt.subplot(2, 2, 4)
+plt.title("Prediction + RGB Overlay")
 plt.imshow(overlay_img)
 plt.axis("off")
 
@@ -147,4 +157,4 @@ plt.tight_layout()
 # 저장
 save_path = os.path.join(args.data_dir, f"{args.sample_name}_predict_overlay.png")
 plt.savefig(save_path)
-print(f"[✅] RGB 오버레이 시각화 저장 완료: {save_path}")
+print(f"[✅] 전체 시각화 저장 완료: {save_path}")
