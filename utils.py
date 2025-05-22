@@ -47,13 +47,27 @@ def apply_white_dark_reference(raw, white, dark):
     return np.clip(corrected, 0, 1)
 
 # HSI 로딩 메인 함수
+
+import glob
+import os
+
 def load_HSI(args):
-    base = args.data_dir
-    sample = args.sample_name
-    raw_path = os.path.join(base, "capture", f"{sample}.raw")
-    white_path = os.path.join(base, "capture", f"WHITEREF_{sample}.raw")
-    dark_path = os.path.join(base, "capture", f"DARKREF_{sample}.raw")
-    label_path = os.path.join(base, "capture", "label.npy")
+    base = os.path.join(args.data_dir, args.sample_name, "capture")  # ✅ capture 하위 폴더로 경로 수정
+
+    # 🔍 .hdr 및 .raw 자동 탐색
+    hdr_files = glob.glob(os.path.join(base, "*.hdr"))
+    raw_files = glob.glob(os.path.join(base, "*.raw"))
+    if not hdr_files:
+        raise FileNotFoundError(f"[ERROR] .hdr 파일이 '{base}' 폴더에 없습니다.")
+    if not raw_files:
+        raise FileNotFoundError(f"[ERROR] .raw 파일이 '{base}' 폴더에 없습니다.")
+
+    # 파일명 유추
+    basename = os.path.splitext(os.path.basename(raw_files[0]))[0].replace("WHITEREF_", "").replace("DARKREF_", "")
+    raw_path = os.path.join(base, f"{basename}.raw")
+    white_path = os.path.join(base, f"WHITEREF_{basename}.raw")
+    dark_path = os.path.join(base, f"DARKREF_{basename}.raw")
+    label_path = os.path.join(base, "label.npy")
 
     raw = load_envi_image(raw_path)
     white = load_envi_image(white_path)
@@ -176,7 +190,6 @@ def train_and_test_data(mirror_image, band, train_point, test_point, true_point,
     return x_train, x_test, sampled_train_point
 
 # 라벨
-
 def train_and_test_label(train_point, test_point, true_point, train_label_map, test_label_map, full_label_map):
     def extract_labels(points, label_map):
         return np.array([label_map[x, y] for x, y in points])
