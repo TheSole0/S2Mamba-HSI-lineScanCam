@@ -4,15 +4,14 @@ import torch.nn as nn
 import torch.utils.data as Data
 import torch.backends.cudnn as cudnn
 from torch import optim
-from torch.autograd import Variable
+from collections import Counter
 from sklearn.metrics import confusion_matrix
 import numpy as np
-import time
 import os
+import glob
 import matplotlib.pyplot as plt
 
 from s2mamba import S2Mamba
-from utils import *
 from utils import (
     setup_seed, load_HSI, chooose_train_and_test_point,
     mirror_hsi, train_and_test_data, train_and_test_label,
@@ -22,7 +21,7 @@ from utils import (
 # ───────────────────────
 # Argument 설정
 # ───────────────────────
-parser = argparse.ArgumentParser("HSI Trainer (Custom Only)")
+parser = argparse.ArgumentParser("HSI Trainer (Multi-Sample)")
 parser.add_argument('--dataset', choices=['custom'], default='custom')
 parser.add_argument('--flag', choices=['test', 'train'], default='train')
 parser.add_argument('--sess', default='s2mamba')
@@ -36,53 +35,42 @@ parser.add_argument('--lr', type=float, default=5e-4)
 parser.add_argument('--gamma', type=float, default=0.99)
 parser.add_argument('--weight_decay', type=float, default=5e-3)
 parser.add_argument('--dropout', type=float, default=0.4)
-parser.add_argument('--data-dir', required=True, help='샘플 폴더 경로 (capture 포함)')
-parser.add_argument('--sample-name', required=True, help='raw/white/dark 공통 prefix (예: FX10e_2025...)')
-parser.add_argument('--num-workers', type=int, default=4, help='DataLoader 병렬 처리 개수')
-parser.add_argument('--pin-memory', action='store_true', help='DataLoader GPU 전송 최적화')
-parser.add_argument('--drop-last', action='store_true', help='마지막 배치 제거 여부')
-
+parser.add_argument('--data-dir', required=True, help='여러 샘플 폴더가 포함된 상위 폴더')
+parser.add_argument('--num-workers', type=int, default=4)
+parser.add_argument('--pin-memory', action='store_true')
+parser.add_argument('--drop-last', action='store_true')
 args = parser.parse_args()
 
 os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
-
-# ───────────────────────
-# 1. Seed 고정 및 데이터 로딩
-# ───────────────────────
 setup_seed(args)
-input_normalize, label, num_classes, TR, TE, color_matrix, color_matrix_pred = load_HSI(args)
-H, W, C = input_normalize.shape
-print(f"height={H}, width={W}, band={C}")
 
 # ───────────────────────
-# 🔍 클래스 분포 디버깅 (remap 기준)
+# 학습/테스트 대상 전체 샘플 로딩
 # ───────────────────────
+sample_folders = sorted(glob.glob(os.path.join(args.data_dir, "FX10e_TEST_*/")))
+all_inputs, all_labels, all_TR, all_TE = [], [], [], []
+
+for folder in sample_folders:
+    sample_name = os.path.basename(os.path.normpath(folder))
+    args.sample_name = sample_name
+    input_normalize, label, num_classes, TR, TE, color_matrix, color_matrix_pred = load_HSI(args)
+    all_inputs.append(input_normalize)
+    all_labels.append(label)
+    all_TR.append(TR)
+    all_TE.append(TE)
+
+input_normalize = np.concatenate(all_inputs, axis=0)
+label = np.concatenate(all_labels, axis=0)
+TR = np.concatenate(all_TR, axis=0)
+TE = np.concatenate(all_TE, axis=0)
+H, W, C = input_normalize.shape
+
+print(f"height={H}, width={W}, band={C}")
 print(f"[DEBUG] 전체 클래스 수 (remap 기준): {num_classes}")
 print(f"[DEBUG] 라벨 내 존재하는 클래스 (remap): {np.unique(label[label >= 0])}")
 
-train_ids, train_counts = np.unique(TR[TR > 0], return_counts=True)
-test_ids, test_counts = np.unique(TE[TE > 0], return_counts=True)
-
-class_names_remap = {
-    0: "정상",  # Remap 기준
-    1: "DW",
-    2: "DA",
-    3: "기타"
-}
-print("라벨 고유값:", np.unique(label))
-print(f"[DEBUG] ▶ Train 클래스 분포 (remap):")
-for cid, cnt in zip(train_ids, train_counts):
-    cname = class_names_remap.get(cid, f"Class {cid}")
-    print(f"  Class {cid} ({cname}): {cnt}개")
-
-print(f"[DEBUG] ▶ Test 클래스 분포 (remap):")
-for cid, cnt in zip(test_ids, test_counts):
-    cname = class_names_remap.get(cid, f"Class {cid}")
-    print(f"  Class {cid} ({cname}): {cnt}개")
-
-
 # ───────────────────────
-# 2. 라벨 분리 및 patch 추출
+# 라벨 분리 및 patch 추출
 # ───────────────────────
 total_pos_train, total_pos_test, total_pos_true, number_train, number_test, number_true = chooose_train_and_test_point(TR, TE, label, num_classes)
 mirror = mirror_hsi(H, W, C, input_normalize, patch=args.patches)
@@ -104,11 +92,8 @@ y_train, y_test, y_true = train_and_test_label(
     full_label_map=label
 )
 
-# GT 시각화 저장
-plt.imsave(os.path.join(args.data_dir, f"{args.sample_name}_GT.png"), label, cmap="tab20", vmin=0, vmax=num_classes-1)
-
 # ───────────────────────
-# 3. Tensor 변환 및 Dataloader 구성
+# Tensor 변환 및 DataLoader 구성
 # ───────────────────────
 x_train = torch.from_numpy(x_train.transpose(0, 3, 1, 2)).float()
 x_test  = torch.from_numpy(x_test.transpose(0, 3, 1, 2)).float()
@@ -133,9 +118,8 @@ test_loader = Data.DataLoader(
     drop_last=args.drop_last
 )
 
-
 # ───────────────────────
-# 4. 모델 설정
+# 모델 및 최적화 설정
 # ───────────────────────
 model = S2Mamba(
     in_chans=C,
@@ -146,8 +130,6 @@ model = S2Mamba(
     drop_path_rate=args.dropout,
     attn_drop_rate=args.dropout
 ).cuda()
-
-from collections import Counter
 
 counter = Counter(y_train.cpu().numpy())
 class_counts = np.array([counter.get(i, 1) for i in range(num_classes)])
@@ -160,7 +142,7 @@ optimizer = optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight
 scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=args.gamma)
 
 # ───────────────────────
-# 5. 학습 or 테스트
+# 학습 또는 테스트 수행
 # ───────────────────────
 if args.flag == 'test':
     model = torch.load(f'./{args.sess}_{args.dataset}.pt').cuda()
