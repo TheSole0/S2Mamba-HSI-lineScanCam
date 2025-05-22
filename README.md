@@ -1,7 +1,7 @@
 # S²Mamba
-논문 **"S²Mamba: A Spatial-spectral State Space Model for Hyperspectral Image Classification"**의 공식 구현입니다.
+논문 **"S²Mamba: A Spatial-spectral State Space Model for Hyperspectral Image Classification"**의 구현입니다.
 
-본 저장소는 실제 산업 현장의 **금속 소재/피복관 결함 검출**을 위한 **초분광 이상 탐지 모델**로 확장 적용할 수 있도록 구성되었습니다.
+본 저장소는 실제 산업 현장의 **금속 소재/피복관 결함 검출**을 위한 라벨링된 픽셀기반 **초분광 이상탐지 모델**로 확장 적용할 수 있도록 구성되었습니다.
 
 ---
 
@@ -19,7 +19,7 @@ pip install numpy scipy scikit-learn einops matplotlib tqdm h5py
 
 ---
 
-## 📁 데이터 구조 예시
+## 데이터 구조 예시
 
 각 샘플 폴더는 아래와 같은 파일 구조를 따라야 합니다:
 
@@ -33,20 +33,26 @@ pip install numpy scipy scikit-learn einops matplotlib tqdm h5py
 ```
 
 ---
+## 시각화 예시
 
-## 🚀 훈련 실행 예시
+<p align="center">
+  <img src="figures/FX10e_TEST_2025-05-14_07-11-11_preview.png" alt="샘플1" width="45%"/>
+  <img src="figures/FX10e_TEST_2025-05-14_07-12-17_preview.png" alt="샘플2" width="45%"/>
+</p>
+
+---
+
+## 훈련 실행 예시
 
 ```bash
 CUDA_VISIBLE_DEVICES=1 python demo_mamba.py \
-  --data-dir "/workspace/NAS/home/crew/jinho/vision/Base_dataset/250514-level4(피복관)-2/FX10e_TEST_2025-05-14_07-12-17" \
-  --sample-name FX10e_TEST_2025-05-14_07-12-17 \
+  --data-dir "/workspace/NAS/home/crew/jinho/vision/Base_dataset/250514-level4(피복관)-2" \
+  --flag train \
   --epoches 10 \
-  --batch_size 5096 \
-  --test_freq 1 \
-  --flag train
+  --batch_size 4096
 ```
 
-> `--data-dir`은 `.raw`, `.hdr`, `label.npy`가 포함된 디렉토리 경로입니다.  
+> `--data-dir`은 `.raw`, `.hdr`, `label.npy`가 포함된 상위 디렉토리 경로입니다.  
 > 학습 로그 및 모델은 `outputs/` 하위 디렉토리에 저장됩니다.
 
 ---
@@ -55,8 +61,8 @@ CUDA_VISIBLE_DEVICES=1 python demo_mamba.py \
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python predict_mamba.py \
-  --data-dir "/workspace/NAS/home/crew/jinho/vision/Base_dataset/250514-level4(피복관)-2/FX10e_TEST_2025-05-14_07-11-11" \
-  --sample-name FX10e_TEST_2025-05-14_07-11-11" \
+  --data-dir "/workspace/NAS/home/crew/jinho/vision/Base_dataset/250514-level4(피복관)-2" \
+  --sample-name FX10e_TEST_2025-05-14_07-11-11 \
   --batch-size 2048
 ```
 
@@ -64,7 +70,7 @@ CUDA_VISIBLE_DEVICES=0 python predict_mamba.py \
 
 ---
 
-## 📖 인용 정보
+## 인용 정보
 
 이 모델이 도움이 되셨다면, 아래 논문을 인용해주세요:
 
@@ -80,10 +86,10 @@ CUDA_VISIBLE_DEVICES=0 python predict_mamba.py \
 
 ---
 
-## Ack
+## 참고 및 감사
 
 본 프로젝트는 아래 오픈소스 프로젝트에 기반하고 있으며, 기여자 분들께 감사드립니다:
 
 - [SpectralFormer](https://github.com/danfenghong/IEEE_TGRS_SpectralFormer)
 - [VMamba](https://github.com/MzeroMiko/VMamba)
-- [S2Mamba] (https://github.com/PURE-melo/S2Mamba?tab=readme-ov-file)
+- [S2Mamba](https://github.com/PURE-melo/S2Mamba)
