@@ -48,6 +48,8 @@ parser.add_argument('--sess', default='s2mamba')
 parser.add_argument('--patches', type=int, default=7)
 parser.add_argument('--batch-size', type=int, default=2048)
 parser.add_argument('--seed', type=int, default=0)
+parser.add_argument('--ckpt', choices=['best', 'last'], default='best', help='불러올 모델 체크포인트')
+
 args = parser.parse_args()
 
 # ───────────────────────────────
@@ -99,7 +101,11 @@ with torch.no_grad():
     dummy_input = torch.randn(1, C, args.patches, args.patches).cuda()
     print(f"→ output shape: {model(dummy_input).shape}")
 
-model.load_state_dict(torch.load(f'{args.sess}_custom_best.pt'))
+
+ckpt_path = f'{args.sess}_custom_{args.ckpt}.pt'  # 예: s2mamba_custom_best.pt 또는 s2mamba_custom_last.pt
+model.load_state_dict(torch.load(ckpt_path))
+
+
 model.eval()
 
 # ───────────────────────────────

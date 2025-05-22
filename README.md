@@ -1,7 +1,7 @@
 # S²Mamba
-논문 **"S²Mamba: A Spatial-spectral State Space Model for Hyperspectral Image Classification"**의 구현입니다.
+논문 "S²Mamba: A Spatial-spectral State Space Model for Hyperspectral Image Classification"의 구현입니다.
 
-본 저장소는 실제 산업 현장의 **금속 소재/피복관 결함 검출**을 위한 라벨링된 픽셀기반 **초분광 이상탐지 모델**로 확장 적용할 수 있도록 구성되었습니다.
+본 저장소는 실제 산업 현장의 **금속 소재 결함 검출**을 위한 라벨링된 픽셀기반 **초분광 이상탐지 모델**로 확장 적용할 수 있도록 구성되었습니다.
 
 ---
 
@@ -36,10 +36,18 @@ pip install numpy scipy scikit-learn einops matplotlib tqdm h5py
 ## 📷 시각화 예시
 
 <p align="center">
-  <img src="figures/FX10e_TEST_2025-05-14_07-11-11_predict_overlay.png" alt="샘플1" width="45%"/>
-  <img src="figures/FX10e_TEST_2025-05-14_07-12-17_predict_overlay.png" alt="샘플2" width="45%"/>
+  <img src="figures/FX10e_TEST_2025-05-14_07-04-24_predict_overlay.png" alt="샘플1" width="45%"/>
+  <img src="figures/FX10e_TEST_2025-05-14_07-07-15_predict_overlay.png" alt="샘플2" width="45%"/>
 </p>
 
+<p align="center">
+  <img src="figures/FX10e_TEST_2025-05-14_07-09-59_predict_overlay.png" alt="샘플3" width="45%"/>
+  <img src="figures/FX10e_TEST_2025-05-14_07-11-11_predict_overlay.png" alt="샘플4" width="45%"/>
+</p>
+
+<p align="center">
+  <img src="figures/FX10e_TEST_2025-05-14_07-12-17_predict_overlay.png" alt="샘플5" width="45%"/>
+</p>
 
 ---
 
@@ -58,7 +66,7 @@ CUDA_VISIBLE_DEVICES=1 python demo_mamba.py \
 
 ---
 
-## 🔍 추론 실행 예시
+## 추론 실행 예시
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python predict_mamba.py \
