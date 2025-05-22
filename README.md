@@ -36,18 +36,19 @@ pip install numpy scipy scikit-learn einops matplotlib tqdm h5py
 ## 📷 시각화 예시
 
 <p align="center">
-  <img src="figures/FX10e_TEST_2025-05-14_07-04-24_predict_overlay.png" alt="샘플1" width="45%"/>
-  <img src="figures/FX10e_TEST_2025-05-14_07-07-15_predict_overlay.png" alt="샘플2" width="45%"/>
+  <img src="figures/FX10e_TEST_2025-05-14_07-04-24_predict_overlay.png" width="45%" />
+  <img src="figures/FX10e_TEST_2025-05-14_07-07-15_predict_overlay.png" width="45%" />
 </p>
 
 <p align="center">
-  <img src="figures/FX10e_TEST_2025-05-14_07-09-59_predict_overlay.png" alt="샘플3" width="45%"/>
-  <img src="figures/FX10e_TEST_2025-05-14_07-11-11_predict_overlay.png" alt="샘플4" width="45%"/>
+  <img src="figures/FX10e_TEST_2025-05-14_07-09-59_predict_overlay.png" width="45%" />
+  <img src="figures/FX10e_TEST_2025-05-14_07-11-11_predict_overlay.png" width="45%" />
 </p>
 
 <p align="center">
-  <img src="figures/FX10e_TEST_2025-05-14_07-12-17_predict_overlay.png" alt="샘플5" width="45%"/>
+  <img src="figures/FX10e_TEST_2025-05-14_07-12-17_predict_overlay.png" width="45%" />
 </p>
+
 
 ---
 
