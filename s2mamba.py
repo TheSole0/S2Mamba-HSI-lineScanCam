@@ -11,17 +11,34 @@ from einops import rearrange, repeat
 from timm.models.layers import DropPath, trunc_normal_
 DropPath.__repr__ = lambda self: f"timm.DropPath({self.drop_prob})"
 import numpy as np
-try:
-    from mamba_ssm.ops.selective_scan_interface import selective_scan_fn, selective_scan_ref
-except:
-    pass
-try:
-    from ops.selective_scan import selective_scan_fn as selective_scan_fn_v1
-    from ops.selective_scan import selective_scan_ref as selective_scan_ref
-except ImportError as e:
-    raise ImportError(f"[❌ selective_scan_v1 불러오기 실패] {e}")
+import torch
 
+def selective_scan_fn_v1(
+    xs,
+    dts,
+    As,
+    Bs,
+    Cs,
+    Ds,
+    delta_bias=None,
+    delta_softplus=False,
+    context_bias=None
+):
+    # Dummy version (forward passthrough)
+    return xs  # shape (B, C, L)
 
+def selective_scan_ref(
+    xs,
+    dts,
+    As,
+    Bs,
+    Cs,
+    Ds,
+    delta_bias=None,
+    delta_softplus=False,
+    context_bias=None
+):
+    return xs
 
 class PatchEmbed(nn.Module):
     def __init__(self, patch_size=1, in_chans=3, embed_dim=96, norm_layer=None, **kwargs):
